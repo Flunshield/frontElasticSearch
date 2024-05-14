@@ -1,19 +1,20 @@
 import ReactDOM from 'react-dom/client'
-import App from './page/App.tsx'
+import HomePage from './page/HomePage.tsx'
 import './index.css'
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import ErrorPage from "./ErrorPage.tsx";
-import Draganddroppage from "./page/Draganddroppage.tsx";
+import ErrorPage from "./page/ErrorPage.tsx";
+import DragAndDropPage from "./page/DragAndDropPage.tsx";
+import {DRAG_AND_DROP_URL, HOME_URL} from "./constante.ts";
 
 const router = createBrowserRouter([
     {
-        path: "/",
-        element: <App/>,
+        path: HOME_URL,
+        element: <HomePage/>,
         errorElement: <ErrorPage/>,
     },
     {
-        path: "/draanddrop",
-        element: <Draganddroppage/>,
+        path: DRAG_AND_DROP_URL,
+        element: <DragAndDropPage/>,
         errorElement: <ErrorPage/>
     },
 ]);

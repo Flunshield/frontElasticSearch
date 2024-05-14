@@ -1,6 +1,6 @@
 import Layout from "../ComposantsCommun/Layout.tsx";
 
-function App() {
+function HomePage() {
 
     return (
         <Layout>
@@ -44,4 +44,4 @@ function App() {
     )
 }
 
-export default App
+export default HomePage

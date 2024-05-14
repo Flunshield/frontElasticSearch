@@ -1,4 +1,4 @@
-import Layout from "./ComposantsCommun/Layout.tsx";
+import Layout from "../ComposantsCommun/Layout.tsx";
 
 function ErrorPage () {
     return (
