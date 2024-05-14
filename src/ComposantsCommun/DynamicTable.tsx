@@ -6,34 +6,24 @@ interface TableRowData {
 
 interface Props {
     data: TableRowData[];
+    columns: string[]
 }
 
-const COLUMN_DEFINITIONS = [
-    { key: 'title', title: 'Title' },
-    { key: 'type', title: 'Type' },
-    { key: 'description', title: 'Description' },
-    { key: 'date_added', title: 'Sortie' },
-    { key: 'duration', title: 'Durée' },
-    { key: 'listed_in', title: 'Catégorie' },
-    { key: 'director', title: 'Réalisateur' },
-    { key: 'cast', title: 'Casting' },
-];
-
-const DynamicTable: React.FC<Props> = ({ data }) => {
+const DynamicTable: React.FC<Props> = ({data, columns}) => {
     if (data.length === 0) {
         return <div className="text-center text-gray-500">No data available</div>;
     }
 
     return (
-        <table className="w-full border-collapse text-left text-gray-500">
+        <table className="w-full border-collapse text-justify text-gray-500">
             <thead>
             <tr>
-                {COLUMN_DEFINITIONS.map((column, index) => (
+                {columns.map((column, index) => (
                     <th
                         key={index}
-                        className="px-4 py-2 font-semibold border border-gray-300"
+                        className="px-4 py-2 font-semibold border border-gray-300 text-center uppercase"
                     >
-                        {column.title}
+                        {column}
                     </th>
                 ))}
             </tr>
@@ -41,9 +31,9 @@ const DynamicTable: React.FC<Props> = ({ data }) => {
             <tbody>
             {data.map((item, index) => (
                 <tr key={index} className="border-b border-gray-200">
-                    {COLUMN_DEFINITIONS.map((column) => (
-                        <td key={column.key} className="px-4 py-2 border border-gray-300">
-                            {item._source[column.key]}
+                    {columns.map((column, key) => (
+                        <td key={key} className="px-4 py-2 border border-gray-300">
+                            {item._source[column]}
                         </td>
                     ))}
                 </tr>

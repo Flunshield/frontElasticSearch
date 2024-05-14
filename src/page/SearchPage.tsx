@@ -4,7 +4,7 @@ import Selector from "../ComposantsCommun/Selector.tsx";
 import DynamicTable from "../ComposantsCommun/DynamicTable.tsx";
 import clsx from "clsx";
 import Filter from "../ComposantsCommun/filter.tsx";
-import {getAllIndexes, getIndex, searchByFilter} from "../helper.ts";
+import {getAllColumns, getAllIndexes, getIndex, searchByFilter} from "../helper.ts";
 import {ITEMS_PER_PAGE} from "../constante.ts";
 
 interface Index {
@@ -37,6 +37,7 @@ function SearchPage() {
     const [casting, setCasting] = useState<string>("");
     const [filterOpen, setFilterOpen] = useState<boolean>(false);
     const [filterApplied, setFilterApplied] = useState<boolean>(false);
+    const [columns, setColumns] = useState<string[]>([]);
 
     const openFilter = () => {
         setFilterOpen(true);
@@ -118,6 +119,11 @@ function SearchPage() {
                 setIndexData(data);
                 setTotalPage(Math.ceil((data?.hits?.total.value ?? 0) / itemsPerPage));
             });
+
+            getAllColumns(indexSelected.index).then((data) => {
+                const key = Object.keys(data[indexSelected.index].mappings.properties);
+                setColumns(key)
+            });
             if (currentPage > totalPage) {
                 setCurrentPage(1);
             }
@@ -126,7 +132,7 @@ function SearchPage() {
                 setIndex(data);
             });
         }
-    }, [indexSelected, itemsPerPage, currentPage, totalPage]);
+    }, [indexSelected, itemsPerPage, currentPage, totalPage, filterApplied]);
 
     return (
         <Layout>
@@ -175,7 +181,7 @@ function SearchPage() {
                 }
                 <div className="m-5">
                     {indexData && indexData?.hits?.total.value > 0 && (
-                        <DynamicTable data={indexData?.hits?.hits}/>
+                        <DynamicTable data={indexData?.hits?.hits} columns={columns.sort()}/>
                     )}
                     <div className="flex justify-center mt-5">
                         {currentPage > 1 && (

@@ -49,7 +49,6 @@ const DragAndDrop: React.FC = () => {
                     const blob = new Blob([jsonContent], { type: 'application/json' });
                     const jsonFile = new File([blob], file.name.replace('.csv', '.json'), { type: 'application/json' });
 
-                    console.log(jsonArray); // Affiche le contenu JSON dans la console
                     setFile(jsonFile);
                 };
                 reader.readAsText(file);
