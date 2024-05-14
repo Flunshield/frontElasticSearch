@@ -4,7 +4,8 @@ import './index.css'
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import ErrorPage from "./page/ErrorPage.tsx";
 import DragAndDropPage from "./page/DragAndDropPage.tsx";
-import {DRAG_AND_DROP_URL, HOME_URL} from "./constante.ts";
+import {DRAG_AND_DROP_URL, HOME_URL, SEARCH_URL} from "./constante.ts";
+import SearchPage from "./page/SearchPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -15,6 +16,11 @@ const router = createBrowserRouter([
     {
         path: DRAG_AND_DROP_URL,
         element: <DragAndDropPage/>,
+        errorElement: <ErrorPage/>
+    },
+    {
+        path: SEARCH_URL,
+        element: <SearchPage/>,
         errorElement: <ErrorPage/>
     },
 ]);
