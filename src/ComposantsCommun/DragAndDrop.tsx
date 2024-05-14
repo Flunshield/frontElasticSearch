@@ -5,6 +5,7 @@ const DragAndDrop: React.FC = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [indexName, setIndexName] = useState('');
     const [file, setFile] = useState<File>();
+    const [isLoading, setIsLoading] = useState(false); // Nouvelle variable d'état pour le chargement
 
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -24,6 +25,7 @@ const DragAndDrop: React.FC = () => {
     const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDragging(false);
+        setIsLoading(true); // Activation du loader pendant le drag and drop
         const files = e.dataTransfer.files;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -35,7 +37,7 @@ const DragAndDrop: React.FC = () => {
                     const jsonArray = lines?.map(line => {
                         const values = line.split(',');
                         return headers?.reduce((obj, header, index) => {
-                            obj[header.trim()] = values[index].trim();
+                            obj[header.trim()] = values[index];
                             return obj;
                         }, {} as Record<string, string>);
                     });
@@ -43,27 +45,23 @@ const DragAndDrop: React.FC = () => {
                     const blob = new Blob([jsonContent], { type: 'application/json' });
                     const jsonFile = new File([blob], file.name.replace('.csv', '.json'), { type: 'application/json' });
 
-                    const formData = new FormData();
-                    formData.append('file', jsonFile);
-                    formData.append('indexName', indexName); // Ajouter le nom de l'index
                     setFile(jsonFile);
                 };
                 reader.readAsText(file);
             } else if (file.type === 'application/json') {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('indexName', indexName); // Ajouter le nom de l'index
                 setFile(file);
             } else {
                 console.log('Unsupported file type.');
             }
         }
+        setIsLoading(false); // Désactivation du loader une fois le traitement du fichier terminé
     };
 
     const handleUpload = async () => {
         if (!file) {
             return;
         }
+        setIsLoading(true); // Activation du loader pendant le téléchargement
         const formData = new FormData();
         formData.append('file', file);
         formData.append('indexName', indexName);
@@ -79,6 +77,8 @@ const DragAndDrop: React.FC = () => {
             }
         } catch (err) {
             console.error(err);
+        } finally {
+            setIsLoading(false); // Désactivation du loader une fois le téléchargement terminé
         }
     };
 
@@ -88,6 +88,7 @@ const DragAndDrop: React.FC = () => {
 
     return (
         <div>
+            {isLoading && <div>Loading...</div>} {/* Affichage du loader */}
             <input
                 type="text"
                 placeholder="Enter index name"
