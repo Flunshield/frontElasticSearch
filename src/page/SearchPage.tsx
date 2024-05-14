@@ -137,7 +137,7 @@ function SearchPage() {
     return (
         <Layout>
             <div>
-                <h1 className="text-center text-2xl font-bold mt-10 mb-10">Application</h1>
+                <h1 className="text-center text-2xl font-bold mt-10 mb-10">Recherche simple</h1>
                 <div className="flex flex-row">
                     <p className="m-5">Veuillez sélectionner un index : </p>
                     <Selector options={index?.map((index) => ({value: index.id, label: index.index})) || []}

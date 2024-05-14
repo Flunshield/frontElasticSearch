@@ -4,8 +4,9 @@ import './index.css'
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import ErrorPage from "./page/ErrorPage.tsx";
 import DragAndDropPage from "./page/DragAndDropPage.tsx";
-import {DRAG_AND_DROP_URL, HOME_URL, SEARCH_URL} from "./constante.ts";
+import {AGREGATION_URL, DRAG_AND_DROP_URL, HOME_URL, SEARCH_URL} from "./constante.ts";
 import SearchPage from "./page/SearchPage.tsx";
+import AgregationPage from "./page/AgregationPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -21,6 +22,11 @@ const router = createBrowserRouter([
     {
         path: SEARCH_URL,
         element: <SearchPage/>,
+        errorElement: <ErrorPage/>
+    },
+    {
+        path: AGREGATION_URL,
+        element: <AgregationPage/>,
         errorElement: <ErrorPage/>
     },
 ]);

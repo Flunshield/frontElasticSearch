@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import {DRAG_AND_DROP_URL, HOME_URL, SEARCH_URL} from "../constante.ts";
+import {AGREGATION_URL, DRAG_AND_DROP_URL, HOME_URL, SEARCH_URL} from "../constante.ts";
 
 const Header = () => {
     return (
@@ -14,7 +14,11 @@ const Header = () => {
                         un fichier</Link>
                 </li>
                 <li>
-                    <Link to={SEARCH_URL} className="text-soft-gray hover:text-white transition-colors">Application</Link>
+                    <Link to={SEARCH_URL} className="text-soft-gray hover:text-white transition-colors">Recherche
+                        simple</Link>
+                </li>
+                <li>
+                    <Link to={AGREGATION_URL} className="text-soft-gray hover:text-white transition-colors">Agrégation</Link>
                 </li>
             </ul>
         </header>
