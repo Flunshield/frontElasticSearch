@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {API_URL, ELASTICSEARCH_INDEX_URL} from "../constante.ts";
+import React, { useState } from 'react';
+import { API_URL, ELASTICSEARCH_INDEX_URL } from '../constante.ts';
 
 const DragAndDrop: React.FC = () => {
     const [isDragging, setIsDragging] = useState(false);
@@ -27,7 +27,29 @@ const DragAndDrop: React.FC = () => {
         const files = e.dataTransfer.files;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            if (file.type === 'text/csv' || file.type === 'application/json') {
+            if (file.type === 'text/csv') {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const lines = reader.result?.toString()?.split('\n');
+                    const headers = lines?.shift()?.split(',');
+                    const jsonArray = lines?.map(line => {
+                        const values = line.split(',');
+                        return headers?.reduce((obj, header, index) => {
+                            obj[header.trim()] = values[index].trim();
+                            return obj;
+                        }, {} as Record<string, string>);
+                    });
+                    const jsonContent = JSON.stringify(jsonArray);
+                    const blob = new Blob([jsonContent], { type: 'application/json' });
+                    const jsonFile = new File([blob], file.name.replace('.csv', '.json'), { type: 'application/json' });
+
+                    const formData = new FormData();
+                    formData.append('file', jsonFile);
+                    formData.append('indexName', indexName); // Ajouter le nom de l'index
+                    setFile(jsonFile);
+                };
+                reader.readAsText(file);
+            } else if (file.type === 'application/json') {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('indexName', indexName); // Ajouter le nom de l'index
@@ -62,7 +84,7 @@ const DragAndDrop: React.FC = () => {
 
     const handleDelete = async () => {
         setFile(undefined);
-    }
+    };
 
     return (
         <div>
@@ -83,24 +105,23 @@ const DragAndDrop: React.FC = () => {
                 onDrop={handleDrop}
             >
                 {file ? (
-                        <div className="font-bold">
-                            <p>Nom du fichier : {file.name}</p>
-                            <p>Type de fichier : {file.type}</p>
-                            <p>Taille du fichier : {file.size} bytes</p>
-                            <button onClick={handleUpload}
-                                    className="border-2 bg-petroleum-blue text-tertiari p-1 rounded-lg mt-10">Upload
-                            </button>
-                            <button onClick={handleDelete}
-                                    className="border-2 bg-red text-tertiari p-1 rounded-lg mt-10 ml-1">Supprimer
-                            </button>
-                        </div>
-                    )
-                    :
+                    <div className="font-bold">
+                        <p>Nom du fichier : {file.name}</p>
+                        <p>Type de fichier : {file.type}</p>
+                        <p>Taille du fichier : {file.size} bytes</p>
+                        <button onClick={handleUpload} className="border-2 bg-petroleum-blue text-tertiari p-1 rounded-lg mt-10">
+                            Upload
+                        </button>
+                        <button onClick={handleDelete} className="border-2 bg-red text-tertiari p-1 rounded-lg mt-10 ml-1">
+                            Supprimer
+                        </button>
+                    </div>
+                ) : (
                     <div>
                         <p className="text-lg font-medium mb-2">Drag & Drop CSV or JSON files here</p>
                         <p className="text-gray-500">Supported file types: .csv, .json</p>
                     </div>
-                }
+                )}
             </div>
         </div>
     );
