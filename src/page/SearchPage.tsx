@@ -1,13 +1,24 @@
 import Layout from "../ComposantsCommun/Layout.tsx";
 import {useEffect, useState} from "react";
 import Selector from "../ComposantsCommun/Selector.tsx";
-import {API_URL, ELASTICSEARCH_GET_INDEX_URL, GET_ALL_INDEX_URL} from "../constante.ts";
 import DynamicTable from "../ComposantsCommun/DynamicTable.tsx";
 import clsx from "clsx";
+import Filter from "../ComposantsCommun/filter.tsx";
+import {getAllIndexes, getIndex, nextPage, prevPage, searchByFilter} from "../helper.ts";
+import {ITEMS_PER_PAGE} from "../constante.ts";
 
 interface Index {
     index: string;
     id: string;
+}
+
+interface dataReceived {
+    hits: {
+        total: {
+            value: number;
+        };
+        hits: [];
+    };
 }
 
 function SearchPage() {
@@ -15,49 +26,100 @@ function SearchPage() {
     const [indexSelected, setIndexSelected] = useState<Index>();
     const [itemsPerPage, setItemsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [indexData, setIndexData] = useState();
+    const [indexData, setIndexData] = useState<dataReceived>();
+    const [totalPage, setTotalPage] = useState<number>(0);
+    const [title, setTitle] = useState<string>("");
+    const [type, setType] = useState<string>("");
+    const [author, setAuthor] = useState<string>("");
+    const [sortie, setSortie] = useState<string>("");
+    const [categorie, setCategorie] = useState<string>("");
+    const [realisateur, setRealisateur] = useState<string>("");
+    const [casting, setCasting] = useState<string>("");
+    const [filterOpen, setFilterOpen] = useState<boolean>(false);
+    const [filterApplied, setFilterApplied] = useState<boolean>(false);
 
-    const ITEMS_PER_PAGE = [
-        {value: 10, label: 10},
-        {value: 50, label: 50},
-        {value: 100, label: 100},
-        {value: 500, label: 500},
-    ]
-    const nextPage = () => {
-        setCurrentPage(currentPage + 1);
-    };
-
-    const prevPage = () => {
-        setCurrentPage(currentPage > 1 ? currentPage - 1 : 1);
-    };
-
-    async function getAllIndexes() {
-        const response = await fetch(API_URL + GET_ALL_INDEX_URL, {
-            method: 'GET',
-        });
-        return response.json();
+    const openFilter = () => {
+        setFilterOpen(true);
     }
 
-    async function getIndex(indexSelected: string) {
-        const response = await fetch(`${API_URL + ELASTICSEARCH_GET_INDEX_URL}?index=${indexSelected}&page=${currentPage}&elementsPerPage=${itemsPerPage}`, {
-            method: 'GET',
+    const closeFilter = () => {
+        const data = {
+            indexName: indexSelected?.index ?? "",
+            currentPage: currentPage,
+            itemsPerPage: itemsPerPage,
+            query: {
+                title: title ?? "",
+                type: type ?? "",
+                author: author ?? "",
+                sortie: sortie ?? "",
+                categorie: categorie ?? "",
+                realisateur: realisateur ?? "",
+                casting: casting ?? ""
+            }
+        };
+        searchByFilter(data).then((data) => {
+            setIndexData(data);
+            setTotalPage(Math.ceil((data?.hits?.total.value ?? 0) / itemsPerPage));
         });
-        return response.json();
+        setFilterApplied(true);
+        setFilterOpen(false);
+    }
+
+    function renderPageNumbers() {
+        const pageNumbers = [];
+        const totalPages = totalPage;
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (
+                i === 1 ||
+                i === currentPage - 1 ||
+                i === currentPage ||
+                i === currentPage + 1 ||
+                i === totalPages
+            ) {
+                pageNumbers.push(
+                    <button
+                        key={i}
+                        className={clsx(
+                            "px-4 py-2 rounded-md bg-petroleum-blue text-white ml-2",
+                            i === currentPage ? "bg-gray-600" : ""
+                        )}
+                        onClick={() => setCurrentPage(i)}
+                    >
+                        {i}
+                    </button>
+                );
+            } else if (
+                i === currentPage - 2 ||
+                i === currentPage + 2
+            ) {
+                pageNumbers.push(
+                    <span key={i} className="mx-2">
+                        ...
+                    </span>
+                );
+            }
+        }
+
+        return pageNumbers;
     }
 
     useEffect(() => {
-        getAllIndexes().then((data) => {
-            setIndex(data);
-        });
-    }, []);
-
-    useEffect(() => {
-        if (indexSelected) {
-            getIndex(indexSelected.index).then((data) => {
+        if (!filterApplied && indexSelected) {
+            getIndex(indexSelected.index, currentPage, itemsPerPage).then((data) => {
                 setIndexData(data);
+                setTotalPage(Math.ceil((data?.hits?.total.value ?? 0) / itemsPerPage));
+            });
+            if (currentPage > totalPage) {
+                setCurrentPage(1);
+            }
+        } else {
+            getAllIndexes().then((data) => {
+                setIndex(data);
             });
         }
-    }, [indexSelected, itemsPerPage, currentPage]);
+    }, [indexSelected, itemsPerPage, currentPage, totalPage]);
+
     return (
         <Layout>
             <div>
@@ -75,24 +137,56 @@ function SearchPage() {
                               onChange={(selectedValue) => {
                                   setItemsPerPage(selectedValue as number)
                               }}/>
+
+                    <button
+                        className="px-4 py-2 rounded-md bg-petroleum-blue text-white ml-2"
+                        onClick={openFilter}
+                    >
+                        Filtrer
+                    </button>
                 </div>
+
+                {filterOpen && (
+                    <Filter
+                        title={title}
+                        setTitle={setTitle}
+                        setType={setType}
+                        type={type}
+                        setAuthor={setAuthor}
+                        author={author}
+                        setSortie={setSortie}
+                        sortie={sortie}
+                        setCategorie={setCategorie}
+                        categorie={categorie}
+                        setRealisateur={setRealisateur}
+                        realisateur={realisateur}
+                        setCasting={setCasting}
+                        casting={casting}
+                        closeFilter={closeFilter}
+                    />)
+                }
                 <div className="m-5">
                     {indexData && indexData?.hits?.total.value > 0 && (
-                    <DynamicTable data={indexData?.hits?.hits}/>)}
-                    <div className={clsx(currentPage > 1 ? "justify-between" : "justify-end", "m-5 flex w-full")}>
+                        <DynamicTable data={indexData?.hits?.hits}/>
+                    )}
+                    <div className="flex justify-center mt-5">
                         {currentPage > 1 && (
-                        <button
-                            className="px-4 py-2 rounded bg-petroleum-blue text-white"
-                            onClick={prevPage}
-                        >
-                            Précédent
-                        </button>)}
-                        <button
-                            className="px-4 py-2 rounded bg-petroleum-blue text-white mr-10"
-                            onClick={nextPage}
-                        >
-                            Suivant
-                        </button>
+                            <button
+                                className="px-4 py-2 rounded-md bg-petroleum-blue text-white mr-2"
+                                onClick={() => prevPage(currentPage, setCurrentPage)}
+                            >
+                                Précédent
+                            </button>
+                        )}
+                        {renderPageNumbers()}
+                        {currentPage < totalPage && (
+                            <button
+                                className="px-4 py-2 rounded-md bg-petroleum-blue text-white ml-2"
+                                onClick={() => nextPage(currentPage, setCurrentPage)}
+                            >
+                                Suivant
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

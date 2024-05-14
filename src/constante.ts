@@ -5,3 +5,10 @@ export const API_URL = "http://localhost:3000";
 export const ELASTICSEARCH_INDEX_URL = "/elasticsearch/createIndex";
 export const GET_ALL_INDEX_URL = "/elasticsearch/getAllIndexes";
 export const ELASTICSEARCH_GET_INDEX_URL = "/elasticsearch/getIndex";
+export const ELASTICSEARCH_SEARCH_URL = "/elasticsearch/search";
+
+export const ITEMS_PER_PAGE = [
+    {value: 10, label: 10},
+    {value: 50, label: 50},
+    {value: 100, label: 100},
+];
