@@ -71,9 +71,11 @@ const DragAndDrop: React.FC = () => {
                 body: formData,
             });
             if (response.ok) {
-                console.log('File uploaded successfully.');
+                window.alert("Fichier indexé");
+                setFile(undefined);
+                setIndexName('');
             } else {
-                console.error('Failed to upload file.');
+                window.alert(await response.json().then((data) => data.message));
             }
         } catch (err) {
             console.error(err);
@@ -88,7 +90,6 @@ const DragAndDrop: React.FC = () => {
 
     return (
         <div>
-            {isLoading && <div>Loading...</div>} {/* Affichage du loader */}
             <input
                 type="text"
                 placeholder="Enter index name"
@@ -116,6 +117,7 @@ const DragAndDrop: React.FC = () => {
                         <button onClick={handleDelete} className="border-2 bg-red text-tertiari p-1 rounded-lg mt-10 ml-1">
                             Supprimer
                         </button>
+                        {isLoading && <div className="text-olive-green mt-5 text-2xl">Loading...</div>} {/* Affichage du loader */}
                     </div>
                 ) : (
                     <div>
