@@ -27,12 +27,3 @@ export async function searchByFilter(data: { indexName: string, currentPage: num
     });
     return response.json();
 }
-
-
-export const nextPage = (currentPage: number, setCurrentPage: (currentPage: number) => void) => {
-    setCurrentPage(currentPage + 1);
-};
-
-export const prevPage = (currentPage: number, setCurrentPage: (currentPage: number) => void) => {
-    setCurrentPage(currentPage > 1 ? currentPage - 1 : 1);
-};

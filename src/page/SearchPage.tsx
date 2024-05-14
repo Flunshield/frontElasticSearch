@@ -4,7 +4,7 @@ import Selector from "../ComposantsCommun/Selector.tsx";
 import DynamicTable from "../ComposantsCommun/DynamicTable.tsx";
 import clsx from "clsx";
 import Filter from "../ComposantsCommun/filter.tsx";
-import {getAllIndexes, getIndex, nextPage, prevPage, searchByFilter} from "../helper.ts";
+import {getAllIndexes, getIndex, searchByFilter} from "../helper.ts";
 import {ITEMS_PER_PAGE} from "../constante.ts";
 
 interface Index {
@@ -65,6 +65,14 @@ function SearchPage() {
         setFilterOpen(false);
     }
 
+    const nextPage = () => {
+        setCurrentPage(currentPage + 1);
+    };
+
+    const prevPage = () => {
+        setCurrentPage(currentPage > 1 ? currentPage - 1 : 1);
+    };
+
     function renderPageNumbers() {
         const pageNumbers = [];
         const totalPages = totalPage;
@@ -81,8 +89,8 @@ function SearchPage() {
                     <button
                         key={i}
                         className={clsx(
-                            "px-4 py-2 rounded-md bg-petroleum-blue text-white ml-2",
-                            i === currentPage ? "bg-gray-600" : ""
+                            "px-4 py-2 rounded-md text-white ml-2",
+                            i === currentPage ? "bg-gray-600" : "bg-petroleum-blue"
                         )}
                         onClick={() => setCurrentPage(i)}
                     >
@@ -173,7 +181,7 @@ function SearchPage() {
                         {currentPage > 1 && (
                             <button
                                 className="px-4 py-2 rounded-md bg-petroleum-blue text-white mr-2"
-                                onClick={() => prevPage(currentPage, setCurrentPage)}
+                                onClick={prevPage}
                             >
                                 Précédent
                             </button>
@@ -182,7 +190,7 @@ function SearchPage() {
                         {currentPage < totalPage && (
                             <button
                                 className="px-4 py-2 rounded-md bg-petroleum-blue text-white ml-2"
-                                onClick={() => nextPage(currentPage, setCurrentPage)}
+                                onClick={nextPage}
                             >
                                 Suivant
                             </button>
