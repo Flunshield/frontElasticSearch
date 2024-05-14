@@ -29,6 +29,10 @@ const DragAndDrop: React.FC = () => {
         const files = e.dataTransfer.files;
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            if (file.size > 3 * 1024 * 1024) { // Vérification de la taille du fichier (3 Mo)
+                window.alert('Le fichier est trop volumineux. Veuillez sélectionner un fichier de moins de 3 Mo.');
+                continue; // Ignorer le fichier et passer au suivant
+            }
             if (file.type === 'text/csv') {
                 const reader = new FileReader();
                 reader.onload = () => {
