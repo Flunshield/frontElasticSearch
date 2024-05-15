@@ -60,3 +60,57 @@ Cette page permet l'affichage du jeu de donnée sous forme d'un tableau avec une
 Cette page permet si le champ le permet de regrouper par type les données et indiquer le nombre total de données étant dans ce type.
 
 ![alt text](image-3.png)
+
+## Section Logstash
+
+### docker-compose.yml
+    
+```yml
+version: '3.7'
+
+services:
+   elasticsearch:
+      image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+      ports:
+       - "9200:9200"
+      environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      networks:
+      - my_network
+
+   logstash:
+      image: docker.elastic.co/logstash/logstash:8.13.4
+      volumes:
+      - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
+      networks:
+      - my_network
+      restart: always
+
+networks:
+   my_network:
+   driver: bridge
+```
+### logstash.conf
+
+```conf
+input {
+file {
+path => "C:/Users/jbert/Documents/ISITECH/logstash/log/customer.json"
+start_position => "beginning"
+sincedb_path => "NUL"  # Utilisez "NUL" sous Windows pour ignorer sincedb
+}
+}
+
+output {
+file {
+path => "C:/Users/jbert/Documents/ISITECH/logstash/log/logs.log"
+codec => line { format => "%{message}" }
+}
+elasticsearch {
+hosts => ["http://localhost:9200/"]
+    index => "logstash-index"
+}
+stdout { codec => rubydebug }
+}
+```
