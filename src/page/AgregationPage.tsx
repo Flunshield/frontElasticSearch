@@ -71,7 +71,7 @@ function AgregationPage() {
                         <button
                             key={column}
                             className={`bg-gray-200 text-gray-700 border-2 border-primary px-6 py-3 rounded-lg focus:outline-none 
-              ${selectedAggregation === column && 'bg-blue-500 text-white'}`}
+              ${selectedAggregation === column && 'bg-petroleum-blue text-white'}`}
                             onClick={() => handleAggregationSelect(column)}
                         >
                             {column}
