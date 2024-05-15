@@ -1,23 +1,46 @@
 import Layout from "../ComposantsCommun/Layout.tsx";
-import {useEffect, useState} from "react";
-import {API_URL, ELASTICSEARCH_AGREGATION_URL} from "../constante.ts";
+import { useEffect, useState } from "react";
+import { API_URL, ELASTICSEARCH_AGREGATION_URL } from "../constante.ts";
+import { getAllIndexes, getAllColumns } from "../helper.ts"; // Assurez-vous d'importer getAllColumns ici
+import { Index } from "./SearchPage.tsx";
+import Selector from "../ComposantsCommun/Selector.tsx";
+
 interface AggregationResult {
     key: string;
     count: number;
 }
+
 function AgregationPage() {
     const [aggregationResult, setAggregationResult] = useState<AggregationResult[]>([]);
     const [selectedAggregation, setSelectedAggregation] = useState<string>('');
+    const [index, setIndex] = useState<Index[]>();
+    const [indexSelected, setIndexSelected] = useState<Index>();
+    const [columns, setColumns] = useState<string[]>([]);
 
     useEffect(() => {
-        if (selectedAggregation) {
+        getAllIndexes().then((data) => {
+            setIndex(data);
+        });
+    }, []);
+
+    useEffect(() => {
+        if (indexSelected) {
+            getAllColumns(indexSelected.index).then((data) => {
+                console.log(data[indexSelected.index].mappings.properties)
+                const key = Object.keys(data[indexSelected.index].mappings.properties);
+                setColumns(key);
+            });
+        }
+    }, [indexSelected]);
+    useEffect(() => {
+        if (selectedAggregation && indexSelected) {
             fetchAggregation(selectedAggregation);
         }
-    }, [selectedAggregation]);
+    }, [selectedAggregation, indexSelected]);
 
     const fetchAggregation = async (aggregationType: string) => {
         try {
-            const response = await fetch(`${API_URL + ELASTICSEARCH_AGREGATION_URL}${aggregationType}`);
+            const response = await fetch(`${API_URL + ELASTICSEARCH_AGREGATION_URL}?type=${aggregationType}&index=${indexSelected?.index}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -36,28 +59,24 @@ function AgregationPage() {
         <Layout>
             <div className="max-w-lg mx-auto mt-10">
                 <h1 className="text-center text-3xl font-bold mb-8">Page d'agrégation</h1>
+                <p className="m-5">Veuillez sélectionner un index : </p>
+                <Selector
+                    options={index?.map((index) => ({ value: index.id, label: index.index })) || []}
+                    onChange={(selectedValue) => {
+                        setIndexSelected(index?.find((index) => index.id === selectedValue))
+                    }}
+                />
                 <div className="flex justify-center mb-8 space-x-4">
-                    <button
-                        className={`bg-gray-200 text-gray-700 border-2 border-primary px-6 py-3 rounded-lg focus:outline-none 
-                  ${selectedAggregation === 'listed_in' && 'bg-blue-500 text-white'}`}
-                        onClick={() => handleAggregationSelect('listed_in')}
-                    >
-                        Catégorie
-                    </button>
-                    <button
-                        className={`bg-gray-200 text-gray-700 border-2 border-primary px-6 py-3 rounded-lg focus:outline-none 
-                  ${selectedAggregation === 'director' && 'bg-blue-500 text-white'}`}
-                        onClick={() => handleAggregationSelect('rating')}
-                    >
-                        Note
-                    </button>
-                    <button
-                        className={`bg-gray-200 text-gray-700 border-2 border-primary px-6 py-3 rounded-lg focus:outline-none 
-                  ${selectedAggregation === 'type' && 'bg-blue-500 text-white'}`}
-                        onClick={() => handleAggregationSelect('type')}
-                    >
-                        Type de film
-                    </button>
+                    {columns.map((column) => (
+                        <button
+                            key={column}
+                            className={`bg-gray-200 text-gray-700 border-2 border-primary px-6 py-3 rounded-lg focus:outline-none 
+              ${selectedAggregation === column && 'bg-blue-500 text-white'}`}
+                            onClick={() => handleAggregationSelect(column)}
+                        >
+                            {column}
+                        </button>
+                    ))}
                 </div>
                 <div className="overflow-x-auto">
                     <table className="table-auto w-full border-collapse border-primary border-2">
@@ -79,7 +98,7 @@ function AgregationPage() {
                 </div>
             </div>
         </Layout>
-    )
+    );
 }
 
 export default AgregationPage;
