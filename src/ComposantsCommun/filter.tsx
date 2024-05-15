@@ -1,92 +1,53 @@
+import React, { useState } from 'react';
+import { searchByFilter } from "../helper.ts";
+import {Index} from "../page/SearchPage.tsx";
 
 interface FilterProps {
-    setTitle: (title: string) => void;
-    title: string;
-    setType: (type: string) => void;
-    type: string;
-    setAuthor: (author: string) => void;
-    author: string;
-    setSortie: (sortie: string) => void;
-    sortie: string;
-    setCategorie: (categorie: string) => void;
-    categorie: string;
-    setRealisateur: (realisateur: string) => void;
-    realisateur: string;
-    setCasting: (casting: string) => void;
-    casting: string;
+    columns: string[];
+    setIndexData: (data: never) => void;
     closeFilter?: () => void;
+    setTotalPage: (totalPage: number) => void;
+    currentPage: number;
+    itemsPerPage: number;
+    indexSelected: Index | undefined;
 }
 
-const Filter = ({
-                    title,
-                    type,
-                    author,
-                    sortie,
-                    categorie,
-                    realisateur,
-                    casting,
-                    setTitle,
-                    setType,
-                    setAuthor,
-                    setSortie,
-                    setCategorie,
-                    setRealisateur,
-                    setCasting,
-                    closeFilter
-                }: FilterProps) => {
+const Filter = ({ columns, setIndexData, closeFilter, indexSelected, itemsPerPage, currentPage, setTotalPage }: FilterProps) => {
+    const [filterValues, setFilterValues] = useState<{ [key: string]: string }>({});
+
+    const handleInputChange = (column: string, value: string) => {
+        setFilterValues(prevValues => ({ ...prevValues, [column]: value }));
+    };
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const data = {
+            indexName: indexSelected?.index ?? "",
+            currentPage: currentPage,
+            itemsPerPage: itemsPerPage,
+            query: filterValues,
+        };
+        const result = await searchByFilter(data);
+        setIndexData(result as unknown as never);
+        setTotalPage(Math.ceil((result?.hits?.total.value ?? 0) / itemsPerPage));
+        if (closeFilter) closeFilter();
+    };
 
     return (
-        <form className="flex flex-wrap justify-center gap-4 mt-6">
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title"
-            />
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                placeholder="Type"
-            />
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Author"
-            />
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={sortie}
-                onChange={(e) => setSortie(e.target.value)}
-                placeholder="Sortie"
-            />
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={categorie}
-                onChange={(e) => setCategorie(e.target.value)}
-                placeholder="Catégorie"
-            />
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={realisateur}
-                onChange={(e) => setRealisateur(e.target.value)}
-                placeholder="Réalisateur"
-            />
-            <input
-                className="px-4 py-2 rounded-md border border-gray-300"
-                type="text"
-                value={casting}
-                onChange={(e) => setCasting(e.target.value)}
-                placeholder="Casting"
-            />
-            <button type="submit" onClick={closeFilter}>Filtrer</button>
+        <form className="flex flex-wrap justify-center gap-4 mt-6" onSubmit={handleSubmit}>
+            {columns.map(column => (
+                <input
+                    key={column}
+                    className="px-4 py-2 rounded-md border border-gray-300"
+                    type="text"
+                    value={filterValues[column] || ""}
+                    onChange={(e) => handleInputChange(column, e.target.value)}
+                    placeholder={column.charAt(0).toUpperCase() + column.slice(1)}
+                />
+            ))}
+            <button type="submit" className="px-4 py-2 rounded-md bg-blue-500 text-white">
+                Filtrer
+            </button>
         </form>
     );
 };

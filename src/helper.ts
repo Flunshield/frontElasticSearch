@@ -20,7 +20,7 @@ export async function getIndex(indexSelected: string, currentPage: number, items
     return response.json();
 }
 
-export async function searchByFilter(data: { indexName: string, currentPage: number, itemsPerPage: number, query: { title: string, type: string, author: string, sortie: string, categorie: string, realisateur: string, casting: string }}) {
+export async function searchByFilter(data: { indexName: string, currentPage: number, itemsPerPage: number, query: { [key: string]: string }}) {
     const response = await fetch(`${API_URL + ELASTICSEARCH_SEARCH_URL}`, {
         method: 'POST',
         headers: {

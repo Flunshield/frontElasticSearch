@@ -4,10 +4,10 @@ import Selector from "../ComposantsCommun/Selector.tsx";
 import DynamicTable from "../ComposantsCommun/DynamicTable.tsx";
 import clsx from "clsx";
 import Filter from "../ComposantsCommun/filter.tsx";
-import {getAllColumns, getAllIndexes, getIndex, searchByFilter} from "../helper.ts";
+import {getAllColumns, getAllIndexes, getIndex} from "../helper.ts";
 import {ITEMS_PER_PAGE} from "../constante.ts";
 
-interface Index {
+export interface Index {
     index: string;
     id: string;
 }
@@ -28,13 +28,6 @@ function SearchPage() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [indexData, setIndexData] = useState<dataReceived>();
     const [totalPage, setTotalPage] = useState<number>(0);
-    const [title, setTitle] = useState<string>("");
-    const [type, setType] = useState<string>("");
-    const [author, setAuthor] = useState<string>("");
-    const [sortie, setSortie] = useState<string>("");
-    const [categorie, setCategorie] = useState<string>("");
-    const [realisateur, setRealisateur] = useState<string>("");
-    const [casting, setCasting] = useState<string>("");
     const [filterOpen, setFilterOpen] = useState<boolean>(false);
     const [filterApplied, setFilterApplied] = useState<boolean>(false);
     const [columns, setColumns] = useState<string[]>([]);
@@ -44,24 +37,6 @@ function SearchPage() {
     }
 
     const closeFilter = () => {
-        const data = {
-            indexName: indexSelected?.index ?? "",
-            currentPage: currentPage,
-            itemsPerPage: itemsPerPage,
-            query: {
-                title: title ?? "",
-                type: type ?? "",
-                author: author ?? "",
-                sortie: sortie ?? "",
-                categorie: categorie ?? "",
-                realisateur: realisateur ?? "",
-                casting: casting ?? ""
-            }
-        };
-        searchByFilter(data).then((data) => {
-            setIndexData(data);
-            setTotalPage(Math.ceil((data?.hits?.total.value ?? 0) / itemsPerPage));
-        });
         setFilterApplied(true);
         setFilterOpen(false);
     }
@@ -143,6 +118,7 @@ function SearchPage() {
                     <Selector options={index?.map((index) => ({value: index.id, label: index.index})) || []}
                               onChange={(selectedValue) => {
                                   setIndexSelected(index?.find((index) => index.id === selectedValue))
+                                  setFilterApplied(false)
                               }}/>
                     <p className="m-5">
                         Item par page :
@@ -150,6 +126,7 @@ function SearchPage() {
                     <Selector options={ITEMS_PER_PAGE?.map((index) => ({value: index.value, label: index.label}))}
                               onChange={(selectedValue) => {
                                   setItemsPerPage(selectedValue as number)
+                                  setFilterApplied(false)
                               }}/>
 
                     <button
@@ -162,20 +139,12 @@ function SearchPage() {
 
                 {filterOpen && (
                     <Filter
-                        title={title}
-                        setTitle={setTitle}
-                        setType={setType}
-                        type={type}
-                        setAuthor={setAuthor}
-                        author={author}
-                        setSortie={setSortie}
-                        sortie={sortie}
-                        setCategorie={setCategorie}
-                        categorie={categorie}
-                        setRealisateur={setRealisateur}
-                        realisateur={realisateur}
-                        setCasting={setCasting}
-                        casting={casting}
+                        setTotalPage={setTotalPage}
+                        indexSelected={indexSelected}
+                        currentPage={currentPage}
+                        itemsPerPage={itemsPerPage}
+                        columns={columns}
+                        setIndexData={setIndexData}
                         closeFilter={closeFilter}
                     />)
                 }
