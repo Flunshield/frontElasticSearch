@@ -31,6 +31,8 @@ Avant de commencer, assurez-vous d'avoir installé :
     OU
     yarn run dev
     ```
+2. Ouvrir votre navigateur et aller à l'adresse suivante : [http://localhost:5173/](http://localhost:5173/)
+3. Ajouter un jeu de donnée dans kibana (Si vous n'en avez pas, vous avez celui dans le dossier **Jeux de donnees** à la racine du projet de disponnible).
 
 ## Présentation des fonctionnalités
 ### Un écran d'acceuil
