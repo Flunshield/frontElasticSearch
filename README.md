@@ -63,54 +63,72 @@ Cette page permet si le champ le permet de regrouper par type les données et in
 
 ## Section Logstash
 
-### docker-compose.yml
-    
-```yml
-version: '3.7'
-
-services:
-   elasticsearch:
-      image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-      ports:
-       - "9200:9200"
-      environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      networks:
-      - my_network
-
-   logstash:
-      image: docker.elastic.co/logstash/logstash:8.13.4
-      volumes:
-      - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
-      networks:
-      - my_network
-      restart: always
-
-networks:
-   my_network:
-   driver: bridge
-```
 ### logstash.conf
+Bon a savoir, sur windows, pensez à mettre des "/" et non des "\" dans les chemins.
 
 ```conf
 input {
-file {
-path => "C:/Users/jbert/Documents/ISITECH/logstash/log/customer.json"
-start_position => "beginning"
-sincedb_path => "NUL"  # Utilisez "NUL" sous Windows pour ignorer sincedb
-}
+    file {
+        path => "C:/Users/jbert/Documents/data/logfile.log"
+        start_position => "beginning"
+        sincedb_path => "C:/Users/jbert/Documents/data/.sincedb"
+    }
 }
 
+filter { }
+
 output {
-file {
-path => "C:/Users/jbert/Documents/ISITECH/logstash/log/logs.log"
-codec => line { format => "%{message}" }
+  elasticsearch {
+    hosts => ["https://846de4990e3142d991f26386ee7a3273.us-central1.gcp.cloud.es.io:443"]
+    user => "elastic"
+    password => "lXP8sy4GR1KVtIEJBtIl0pQk"
+    index => "mon_api"
+  }
+  stdout { codec => rubydebug }
 }
-elasticsearch {
-hosts => ["http://localhost:9200/"]
-    index => "logstash-index"
+
+```
+
+### Dashboard issu des logs
+![alt text](image-5.png)
+
+![alt text](image-7.png)
+
+
+### Exemple des logs dans la console lors du chargement du fichier de log
+
+```bash
+{
+       "message" => "Jul 27 14:41:58 combo kernel: mtrr: v2.0 (20020519)\r",
+           "log" => {
+        "file" => {
+            "path" => "C:/Users/jbert/Documents/data/logfile.log"
+        }
+    },
+    "@timestamp" => 2024-05-16T10:01:30.876210300Z,
+          "host" => {
+        "name" => "PC-DEV"
+    },
+         "event" => {
+        "original" => "Jul 27 14:41:58 combo kernel: mtrr: v2.0 (20020519)\r"
+    },
+      "@version" => "1"
 }
-stdout { codec => rubydebug }
+{
+       "message" => "Jul 27 14:41:59 combo kernel: audit: initializing netlink socket (disabled)\r",
+           "log" => {
+        "file" => {
+            "path" => "C:/Users/jbert/Documents/data/logfile.log"
+        }
+    },
+    "@timestamp" => 2024-05-16T10:01:30.878212100Z,
+          "host" => {
+        "name" => "PC-DEV"
+    },
+         "event" => {
+        "original" => "Jul 27 14:41:59 combo kernel: audit: initializing netlink socket (disabled)\r"
+    },
+      "@version" => "1"
 }
 ```
+![alt text](image-8.png)
